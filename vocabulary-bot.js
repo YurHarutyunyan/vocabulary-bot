@@ -1,8 +1,10 @@
-import express, { application } from "express";
+import express from "express";
 import "dotenv/config";
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
+import insert  from '/home/yuri/dev/vocabulary-bot/insertDb.js';
+import view from "/home/yuri/dev/vocabulary-bot/viewDb.js";
+import deleteDb from "/home/yuri/dev/vocabulary-bot/deleteDb.js";
 const port = 5001;  
-
 
 const app = express();
 app.use(express.json());
@@ -10,7 +12,7 @@ let state = 'not set'
 let foreignSentence = ''
 let translatedSentence = ''
 async function sendMessageToTelegramBot(chatId,text){
-  await fetch(`https://api.telegram.org/bot6272421042:AAGBfLDID_NX1Co-0VZerJyhTkKnxmhkDIA/sendMessage`,
+  await fetch(`https://api.telegram.org/bot${process.env.bot_token}/sendMessage`,
   {
      method:'POST',
     headers:{
@@ -40,10 +42,32 @@ app.post("/api", (req, res) => {
   }else if(state==='waiting1'){
     state='not set'
     translatedSentence = message;
+    insert(chatId,[{translatedSentence:translatedSentence,foreignSentence:foreignSentence,wrongAnswer:false,wrongAnswerCount:0}])
     sendMessageToTelegramBot(chatId,`Saved : ${foreignSentence}  ----  ${translatedSentence}`)
   }
+  else if  (message==="/view"){
+    sendMessageToTelegramBot(chatId,'here is your vocabulary')
+    view(chatId).then((voc)=>{
+      
+      const arrayToSend =[]
+       voc.forEach((item)=>{
+        arrayToSend.push({foreignSentence:item['foreignSentence'],translatedSentence:item['translatedSentence']})
+      })
+      sendMessageToTelegramBot(chatId,JSON.stringify(arrayToSend))
+    })
+  }
+  else if(message==="/delete"){
+    state='waiting for delete data'
+    sendMessageToTelegramBot(chatId,'enter text you want to delete');
+
+}
+else if(state==='waiting for delete data'){
+  const deleteData = message;
+}
+
 res.send({status:'ok'})
 });
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
