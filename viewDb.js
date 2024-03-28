@@ -1,15 +1,15 @@
 import {MongoClient} from 'mongodb'
 
-const url = 'mongodb://localhost:27017'
+const url = 'mongodb://localhost:27017/myMongoForVoc'
 const client =new MongoClient(url)
-const dbName = 'app_mongo';
+const dbName = 'vocabulary_database';
 async function view(chatId){
     await client.connect();
     console.log('Connected successfully to server');
     const db = client.db(dbName);
     const collection =db.collection(`${chatId}`)
     const vocabulary = await collection.find({}).toArray();
-    //console.log('Found documents =>',vocabulary);
+    console.log('Found documents =>',vocabulary);
     return vocabulary;
 
 }

@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb'
 
-const url = 'mongodb://localhost:27017'
+const url = 'mongodb://localhost:80'
 const client =new MongoClient(url)
 const dbName = 'app_mongo';
 async function insert(chatId,itemsToInsert){
@@ -16,7 +16,7 @@ async function insert(chatId,itemsToInsert){
 
 }
 
-insert()
+insert(12,{h:'sdfsf'})
 .then(console.log)
 .catch(console.error)
 .finally(()=>client.close())
